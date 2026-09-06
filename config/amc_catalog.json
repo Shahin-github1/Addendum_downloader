@@ -1,0 +1,352 @@
+[
+  {
+    "id": "360_one",
+    "name": "360 ONE Asset Management",
+    "url": "https://www.360.one/asset/mutual-funds/downloads/",
+    "enabled": true,
+    "priority": 1
+  },
+  {
+    "id": "abakkus",
+    "name": "Abakkus Mutual Fund",
+    "url": "https://www.abakkusmf.com/statutory-disclosures.html",
+    "enabled": true,
+    "priority": 2
+  },
+  {
+    "id": "aditya_birla",
+    "name": "Aditya Birla Sun Life Mutual Fund",
+    "url": "https://mutualfund.adityabirlacapital.com/forms-and-downloads/addendums",
+    "enabled": true,
+    "priority": 3
+  },
+  {
+    "id": "alphagrep",
+    "name": "AlphaGrep Mutual Fund",
+    "url": "https://www.alphagrepmf.ai/disclosures",
+    "enabled": true,
+    "priority": 4
+  },
+  {
+    "id": "angelone",
+    "name": "Angel One Mutual Fund",
+    "url": "https://www.angelonemf.com/downloads",
+    "enabled": true,
+    "priority": 5
+  },
+  {
+    "id": "axis",
+    "name": "Axis Mutual Fund",
+    "url": "https://www.axismf.com/statutory-disclosures",
+    "enabled": true,
+    "priority": 6
+  },
+  {
+    "id": "bajaj",
+    "name": "Bajaj Finserv Mutual Fund",
+    "url": "https://www.bajajamc.com/downloads?notice-addendums=",
+    "enabled": true,
+    "priority": 7
+  },
+  {
+    "id": "bandhan",
+    "name": "Bandhan Mutual Fund",
+    "url": "https://bandhanmutual.com/downloads/addendums",
+    "enabled": true,
+    "priority": 8
+  },
+  {
+    "id": "baroda_bnp",
+    "name": "Baroda BNP Paribas Mutual Fund",
+    "url": "https://www.barodabnpparibasmf.in/downloads/notice-cum-addenda",
+    "enabled": true,
+    "priority": 9
+  },
+  {
+    "id": "boi",
+    "name": "Bank of India Mutual Fund",
+    "url": "https://www.boimf.in/regulatory-reports/addenda-notice",
+    "enabled": true,
+    "priority": 10
+  },
+  {
+    "id": "canara_robeco",
+    "name": "Canara Robeco Mutual Fund",
+    "url": "https://www.canararobeco.com/documents/forms-downloads/notice-cum-addendum/?searchyear=2026-27",
+    "enabled": true,
+    "priority": 11
+  },
+  {
+    "id": "capitalmind",
+    "name": "Capitalmind Mutual Fund",
+    "url": "https://capitalmindmf.com/statutory-disclosures.html#",
+    "enabled": true,
+    "priority": 12
+  },
+  {
+    "id": "choice",
+    "name": "Choice Mutual Fund",
+    "url": "https://choicemf.com/disclosures/notices",
+    "enabled": true,
+    "priority": 13
+  },
+  {
+    "id": "dsp",
+    "name": "DSP Mutual Fund",
+    "url": "https://www.dspim.com/downloads?category=Notices%20and%20Addendum&sub_category=Addendum",
+    "enabled": true,
+    "priority": 14
+  },
+  {
+    "id": "edelweiss",
+    "name": "Edelweiss Mutual Fund",
+    "url": "https://www.edelweissmf.com/downloads/notice-cum-addendum",
+    "enabled": true,
+    "priority": 15
+  },
+  {
+    "id": "franklin_templeton",
+    "name": "Franklin Templeton Mutual Fund",
+    "url": "https://www.franklintempletonindia.com/downloads/fund-documents",
+    "enabled": true,
+    "priority": 16
+  },
+  {
+    "id": "groww",
+    "name": "Groww Mutual Fund",
+    "url": "https://www.growwmf.in/downloads/addendum",
+    "enabled": true,
+    "priority": 17
+  },
+  {
+    "id": "hdfc",
+    "name": "HDFC Mutual Fund",
+    "url": "https://www.hdfcfund.com/statutory-disclosure/form-disclosures/addenda-notices",
+    "enabled": true,
+    "priority": 18
+  },
+  {
+    "id": "helios",
+    "name": "Helios Mutual Fund",
+    "url": "https://www.heliosmf.in/downloads/",
+    "enabled": true,
+    "priority": 19
+  },
+  {
+    "id": "hsbc",
+    "name": "HSBC Mutual Fund",
+    "url": "https://www.assetmanagement.hsbc.co.in/en/mutual-funds/investor-resources?Cap=&Doc=notice-ads#&module-19=1",
+    "enabled": true,
+    "priority": 20
+  },
+  {
+    "id": "icici_pru",
+    "name": "ICICI Prudential Mutual Fund",
+    "url": "https://www.icicipruamc.com/news-and-media/announcements",
+    "enabled": true,
+    "priority": 21
+  },
+  {
+    "id": "invesco",
+    "name": "Invesco Mutual Fund",
+    "url": "https://invescomutualfund.com/literature-and-form?tab=Addendums",
+    "enabled": true,
+    "priority": 22
+  },
+  {
+    "id": "iti",
+    "name": "ITI Mutual Fund",
+    "url": "https://www.itiamc.com/downloads",
+    "enabled": true,
+    "priority": 23
+  },
+  {
+    "id": "jio_blackrock",
+    "name": "Jio BlackRock AMC",
+    "url": "https://www.jioblackrockamc.com/statutory-disclosure/addendum-and-notices/notice-cum-addendums",
+    "enabled": true,
+    "priority": 24
+  },
+  {
+    "id": "jm_financial",
+    "name": "JM Financial Mutual Fund",
+    "url": "https://www.jmfinancialmf.com/downloads/Notice-and-Addendums",
+    "enabled": true,
+    "priority": 25
+  },
+  {
+    "id": "kotak",
+    "name": "Kotak Mahindra Mutual Fund",
+    "url": "https://www.kotakmf.com/Information/forms-and-downloads",
+    "enabled": true,
+    "priority": 26
+  },
+  {
+    "id": "lic",
+    "name": "LIC Mutual Fund",
+    "url": "https://www.licmf.com/addendum-notice",
+    "enabled": true,
+    "priority": 27
+  },
+  {
+    "id": "mahindra_manulife",
+    "name": "Mahindra Manulife Mutual Fund",
+    "url": "https://www.mahindramanulife.com/downloads#MANDATORY-DISCLOSURES-+-MONTHLY-PORTFOLIO-DISCLOSURE",
+    "enabled": true,
+    "priority": 28
+  },
+  {
+    "id": "mirae_asset",
+    "name": "Mirae Asset Mutual Fund",
+    "url": "https://www.miraeassetmf.co.in/downloads/statutory-disclosure/addendum",
+    "enabled": true,
+    "priority": 29
+  },
+  {
+    "id": "motilal_oswal",
+    "name": "Motilal Oswal Mutual Fund",
+    "url": "https://www.motilaloswalmf.com/downloads/addendums",
+    "enabled": true,
+    "priority": 30
+  },
+  {
+    "id": "navi",
+    "name": "Navi Mutual Fund",
+    "url": "https://navi.com/mutual-fund/downloads/addendums",
+    "enabled": true,
+    "priority": 31
+  },
+  {
+    "id": "nippon_india",
+    "name": "Nippon India Mutual Fund",
+    "url": "https://mf.nipponindiaim.com/investor-service/quick-links/notice-addendum",
+    "enabled": true,
+    "priority": 32
+  },
+  {
+    "id": "nj",
+    "name": "NJ Mutual Fund",
+    "url": "https://downloads.njmutualfund.com/downloads.php",
+    "enabled": true,
+    "priority": 33
+  },
+  {
+    "id": "pgim_india",
+    "name": "PGIM India Mutual Fund",
+    "url": "https://www.pgimindia.com/mutual-funds/disclosures/Addenda-Notices/Addenda-Notices",
+    "enabled": true,
+    "priority": 34
+  },
+  {
+    "id": "ppfas",
+    "name": "PPFAS Mutual Fund (Parag Parikh)",
+    "url": "https://amc.ppfas.com/downloads/addendum/",
+    "enabled": true,
+    "priority": 35
+  },
+  {
+    "id": "quant",
+    "name": "Quant Mutual Fund",
+    "url": "https://quantmutual.com/downloads/addendum",
+    "enabled": true,
+    "priority": 36
+  },
+  {
+    "id": "quantum",
+    "name": "Quantum Mutual Fund",
+    "url": "https://www.quantumamc.com/Download-document#headingOne",
+    "enabled": true,
+    "priority": 37
+  },
+  {
+    "id": "samco",
+    "name": "SAMCO Mutual Fund",
+    "url": "https://www.samcomf.com/downloads#",
+    "enabled": true,
+    "priority": 38
+  },
+  {
+    "id": "sbi",
+    "name": "SBI Mutual Fund",
+    "url": "https://www.sbimf.com/notice-and-addendums",
+    "enabled": true,
+    "priority": 39
+  },
+  {
+    "id": "shriram",
+    "name": "Shriram Mutual Fund",
+    "url": "https://www.shriramamc.in/AmcDwnldAddendaNotice.aspx",
+    "enabled": true,
+    "priority": 40
+  },
+  {
+    "id": "sundaram",
+    "name": "Sundaram Mutual Fund",
+    "url": "https://www.sundarammutual.com/addendum-notice",
+    "enabled": true,
+    "priority": 41
+  },
+  {
+    "id": "tata",
+    "name": "Tata Mutual Fund",
+    "url": "https://www.tatamutualfund.com/notice-addendum/tmf",
+    "enabled": true,
+    "priority": 42
+  },
+  {
+    "id": "taurus",
+    "name": "Taurus Mutual Fund",
+    "url": "https://taurusmutualfund.com/addendum-notices?field_addendum_notices_year_target_id=All",
+    "enabled": true,
+    "priority": 43
+  },
+  {
+    "id": "trust",
+    "name": "Trust Mutual Fund",
+    "url": "https://www.trustmf.com/downloads?activeTab=addendum",
+    "enabled": true,
+    "priority": 44
+  },
+  {
+    "id": "unifi",
+    "name": "Unifi Capital Mutual Fund",
+    "url": "https://unifimf.com/statutorydocuments/",
+    "enabled": true,
+    "priority": 45
+  },
+  {
+    "id": "union",
+    "name": "Union Mutual Fund",
+    "url": "https://www.unionmf.com/about-us/downloads",
+    "enabled": true,
+    "priority": 46
+  },
+  {
+    "id": "uti",
+    "name": "UTI Mutual Fund",
+    "url": "https://www.utimf.com/forms-and-downloads/",
+    "enabled": true,
+    "priority": 47
+  },
+  {
+    "id": "wealth_company",
+    "name": "The Wealth Company AMC",
+    "url": "https://www.wealthcompanyamc.in/literature-forms/statutory-disclosures/addendum-and-notices/",
+    "enabled": true,
+    "priority": 48
+  },
+  {
+    "id": "whiteoak",
+    "name": "WhiteOak Capital Mutual Fund",
+    "url": "https://mf.whiteoakamc.com/regulatory-disclosures",
+    "enabled": true,
+    "priority": 49
+  },
+  {
+    "id": "zerodha",
+    "name": "Zerodha Fund House",
+    "url": "https://www.zerodhafundhouse.com/resources/addendums-and-notices/",
+    "enabled": true,
+    "priority": 50
+  }
+]

@@ -37,6 +37,64 @@ class PDFDownloader:
         # Quote query if needed
         return urllib.parse.urlunsplit(parts)
 
+    @staticmethod
+    def extract_original_filename(
+        pdf_url: str,
+        resp_headers: Optional[Dict[str, str]] = None,
+        fallback_title: Optional[str] = None
+    ) -> str:
+        """
+        Preserves the exact original filename from HTTP headers or the URL path.
+        Does NOT rename or standardize, only sanitizes characters prohibited by Windows filesystem.
+        """
+        raw_name = ""
+
+        # 1. Check Content-Disposition header if available
+        if resp_headers:
+            cd = resp_headers.get('Content-Disposition') or resp_headers.get('content-disposition') or ""
+            if cd:
+                m_star = re.search(r"filename\*\s*=\s*UTF-8''([^;]+)", cd, re.I)
+                if m_star:
+                    raw_name = urllib.parse.unquote(m_star.group(1).strip())
+                else:
+                    m = re.search(r'filename\s*=\s*"?([^";]+)"?', cd, re.I)
+                    if m:
+                        raw_name = m.group(1).strip()
+
+        # 2. Extract from URL path
+        if not raw_name:
+            unquoted_url = urllib.parse.unquote(pdf_url.strip())
+            parsed = urllib.parse.urlsplit(unquoted_url)
+            path_part = parsed.path.rstrip('/')
+            base = os.path.basename(path_part)
+            if base:
+                if base.lower().endswith('.pdf'):
+                    raw_name = base
+                else:
+                    # Check query string for embedded file parameters
+                    qs = urllib.parse.parse_qs(parsed.query)
+                    for qk in ['file', 'name', 'doc', 'filename', 'document', 'download']:
+                        if qk in qs and qs[qk][0]:
+                            cand = os.path.basename(qs[qk][0])
+                            if cand.lower().endswith('.pdf'):
+                                raw_name = cand
+                                break
+                    if not raw_name:
+                        raw_name = base
+
+        # 3. Fallback to title if still empty
+        if not raw_name:
+            raw_name = fallback_title or "Addendum.pdf"
+
+        # Sanitize only illegal Windows filesystem characters: \ / : * ? " < > |
+        raw_name = re.sub(r'[\x00-\x1f\\/*?:"<>|]', '_', raw_name)
+        raw_name = raw_name.strip(' .')  # Remove illegal leading/trailing dots or spaces
+
+        if not raw_name.lower().endswith('.pdf'):
+            raw_name = f"{raw_name}.pdf"
+
+        return raw_name[:180]
+
     def download_file(
         self,
         pdf_url: str,
@@ -46,26 +104,12 @@ class PDFDownloader:
         max_retries: int = 3
     ) -> Dict[str, Any]:
         """
-        Downloads a PDF and saves it into:
-        downloads/{day_folder_name}/[{amc_name}] - {doc_title}.pdf
+        Downloads a PDF preserving the original AMC filename, organized by AMC subfolder:
+        downloads/{day_folder_name}/{sanitized_amc}/{original_filename}.pdf
         """
-        target_dir = os.path.join(self.base_download_dir, day_folder_name)
-        os.makedirs(target_dir, exist_ok=True)
-
-        # Generate clean filename
         sanitized_amc = clean_filename(amc_name)
-        sanitized_title = clean_filename(doc_title)
-        if not sanitized_title.lower().endswith(".pdf"):
-            base_fname = f"[{sanitized_amc}] - {sanitized_title}.pdf"
-        else:
-            base_fname = f"[{sanitized_amc}] - {sanitized_title}"
-
-        dest_path = os.path.join(target_dir, base_fname)
-        counter = 1
-        name_root, name_ext = os.path.splitext(base_fname)
-        while os.path.exists(dest_path):
-            dest_path = os.path.join(target_dir, f"{name_root}_{counter}{name_ext}")
-            counter += 1
+        target_dir = os.path.join(self.base_download_dir, day_folder_name, sanitized_amc)
+        os.makedirs(target_dir, exist_ok=True)
 
         clean_url = self.sanitize_url(pdf_url)
         headers = {'Referer': clean_url}
@@ -85,6 +129,17 @@ class PDFDownloader:
                 if b"%PDF-" not in content[:1024]:
                     snippet = content[:60].decode('utf-8', errors='ignore').replace('\n', ' ')
                     raise ValueError(f"Server returned non-PDF content (starts with: '{snippet}')")
+
+                # Extract exact original filename from headers or URL
+                orig_fname = self.extract_original_filename(clean_url, resp.headers, doc_title)
+                dest_path = os.path.join(target_dir, orig_fname)
+
+                # Avoid intra-folder collisions if identical filename already exists
+                counter = 1
+                name_root, name_ext = os.path.splitext(orig_fname)
+                while os.path.exists(dest_path):
+                    dest_path = os.path.join(target_dir, f"{name_root}_{counter}{name_ext}")
+                    counter += 1
 
                 # Calculate MD5 hash
                 file_hash = hashlib.md5(content).hexdigest()
@@ -115,3 +170,4 @@ class PDFDownloader:
             "file_hash": None,
             "error": last_error
         }
+

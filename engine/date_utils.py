@@ -2,6 +2,7 @@ import os
 import sys
 import datetime
 import re
+from typing import Any, Optional
 
 def get_app_root() -> str:
     """Returns the base application directory for both source and PyInstaller frozen EXE."""
@@ -54,3 +55,71 @@ def clean_filename(filename: str) -> str:
     cleaned = re.sub(r'[\\/*?:"<>|]', '_', filename)
     cleaned = re.sub(r'\s+', ' ', cleaned).strip()
     return cleaned[:180]  # Avoid MAX_PATH issues
+
+def parse_flexible_date(date_str: str) -> datetime.date:
+    """
+    Parses diverse Indian AMC date formats into a datetime.date object.
+    Supports DD-MM-YYYY, YYYY-MM-DD, DD-Mon-YYYY, DD Month YYYY, etc.
+    Returns None if unparseable.
+    """
+    if not date_str:
+        return None
+    s = str(date_str).strip()
+    # Normalize slashes and dots to hyphens
+    s = re.sub(r'[./]', '-', s)
+    s = re.sub(r'\s+', ' ', s)
+
+    # List of strptime candidate patterns
+    candidate_patterns = [
+        "%Y-%m-%d",
+        "%d-%m-%Y",
+        "%d-%b-%Y",
+        "%d-%B-%Y",
+        "%d %b %Y",
+        "%d %B %Y",
+        "%b %d, %Y",
+        "%B %d, %Y",
+        "%b %d %Y",
+        "%B %d %Y",
+        "%d-%m-%y",
+        "%m-%d-%Y"
+    ]
+
+    for pat in candidate_patterns:
+        try:
+            return datetime.datetime.strptime(s, pat).date()
+        except Exception:
+            pass
+
+    # Try extracting date pattern via regex if embedded in surrounding text
+    patterns = [
+        r'\b(\d{1,2})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*-(\d{2,4})\b',
+        r'\b(\d{4})-(\d{1,2})-(\d{1,2})\b',
+        r'\b(\d{1,2})-(\d{1,2})-(\d{2,4})\b',
+    ]
+    for p in patterns:
+        m = re.search(p, s, re.I)
+        if m:
+            matched_substr = m.group(0)
+            for pat in candidate_patterns:
+                try:
+                    return datetime.datetime.strptime(matched_substr, pat).date()
+                except Exception:
+                    pass
+
+    return None
+
+def is_date_on_or_after(date_val: Any, cutoff_date: datetime.date) -> bool:
+    """
+    Checks if a given date string or datetime.date is on or after cutoff_date.
+    If date_val cannot be parsed, returns True by default so valid files are not lost.
+    """
+    if not cutoff_date:
+        return True
+    if isinstance(date_val, datetime.date):
+        return date_val >= cutoff_date
+    parsed = parse_flexible_date(str(date_val))
+    if parsed is None:
+        return True  # Lenient fallback if date not determinable
+    return parsed >= cutoff_date
+

@@ -2,6 +2,7 @@ import os
 import re
 import json
 import time
+import datetime
 import urllib.parse
 from typing import List, Dict, Any, Optional
 import requests
@@ -79,7 +80,7 @@ class AMCExtractor:
                 pass
             self._driver = None
 
-    def extract_addendums(self, amc: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def extract_addendums(self, amc: Dict[str, Any], from_date: Optional[datetime.date] = None) -> List[Dict[str, Any]]:
         """
         Main extraction entry point for an AMC.
         Tier 1: Fast HTTP GET/POST with requests.
@@ -95,7 +96,7 @@ class AMCExtractor:
 
         # Direct API Handlers
         if amc_id == "sbi":
-            items = self._extract_sbi(amc_id, amc_name)
+            items = self._extract_sbi(amc_id, amc_name, from_date=from_date)
             if items and len(items) > 0:
                 return items
 
@@ -123,7 +124,7 @@ class AMCExtractor:
         items = self._extract_via_browser(url, amc_id, amc_name)
         return items
 
-    def _extract_sbi(self, amc_id: str, amc_name: str) -> List[Dict[str, Any]]:
+    def _extract_sbi(self, amc_id: str, amc_name: str, from_date: Optional[datetime.date] = None) -> List[Dict[str, Any]]:
         api_url = 'https://www.sbimf.com/ajaxcall/CMS/GetNoticeandAddendumsData'
         headers = {
             'User-Agent': self.HEADERS['User-Agent'],
@@ -131,7 +132,8 @@ class AMCExtractor:
             'X-Requested-With': 'XMLHttpRequest',
             'Referer': 'https://www.sbimf.com/notice-and-addendums',
         }
-        payload = {'AddendumType': 'Scheme Information', 'FromDate': '01/01/2025', 'ToDate': '09/07/2026'}
+        from_str = from_date.strftime("%d/%m/%Y") if from_date else "01/01/2025"
+        payload = {'AddendumType': 'Scheme Information', 'FromDate': from_str, 'ToDate': '09/07/2026'}
         try:
             r = requests.post(api_url, headers=headers, json=payload, verify=False, timeout=15)
             if r.status_code == 200 and r.text:
@@ -139,6 +141,7 @@ class AMCExtractor:
         except Exception:
             pass
         return []
+
 
     def _extract_sundaram(self, amc_id: str, amc_name: str) -> List[Dict[str, Any]]:
         extracted = []

@@ -107,21 +107,25 @@ Every business morning, designated operational personnel run the tool via either
   ```
 
 ### 4.2 Output Folder Hierarchy
-All outputs are created under the `downloads/` directory, segmented strictly by current calendar date:
+All outputs are created under the `downloads/` directory, segmented strictly by current calendar date and organized into individual AMC subfolders to preserve 100% of the original server file names without collisions:
 ```
 downloads/
-└── 7th September 2026/
-    ├── Addendum_Summary_7th_September_2026.xlsx
-    ├── [SBI Mutual Fund] - notice-cum-addendum-for-merger-of-schemes.pdf
-    ├── [The Wealth Company AMC] - Addendum 24 (2026-27) Hybrid Schemes-Categorisation.pdf
-    ├── [Sundaram Mutual Fund] - Notice cum Addendum for Change in Categorisation.pdf
-    ├── [Trust Mutual Fund] - 58_2026 - Change in Riskometer of TRUSTMF Short Term Fund.pdf
-    ├── [Union Mutual Fund] - Amendment to SAI.pdf
-    └── [Franklin Templeton Mutual Fund] - Addendum-Addition-of-2-CAMS-Location.pdf
+└── 10th September 2026/
+    ├── Addendum_Summary_10th_September_2026.xlsx
+    ├── SBI Mutual Fund/
+    │   └── Notice_15072026.pdf
+    ├── Sundaram Mutual Fund/
+    │   └── 2026_Notice_Ad_07.pdf
+    ├── Motilal Oswal Mutual Fund/
+    │   └── Notice_cum_addendum_12.pdf
+    ├── Trust Mutual Fund/
+    │   └── 58_2026_Change_in_Riskometer.pdf
+    └── The Wealth Company AMC/
+        └── Addendum_24_2026_27.pdf
 ```
 
 ### 4.3 Summary Excel Report Format
-The auto-generated Excel report (`Addendum_Summary_<Date>.xlsx`) includes the following columns:
+The auto-generated daily Excel report (`Addendum_Summary_<Date>.xlsx`) includes the following columns:
 
 | Column | Header | Description | Example |
 | :---: | :--- | :--- | :--- |
@@ -129,7 +133,7 @@ The auto-generated Excel report (`Addendum_Summary_<Date>.xlsx`) includes the fo
 | **B** | Document Title | Exact regulatory title of the filing | `Notice cum Addendum for Merger of Schemes` |
 | **C** | Date | Publication date detected in document/source | `04-Sep-2026` |
 | **D** | PDF URL | Live clickable hyperlink to official online notice | `[Open Notice](https://www.sbimf.com/...)` |
-| **E** | Local Filename | Actual sanitized filename stored on disk | `[SBI Mutual Fund] - notice-cum-addendum...pdf` |
+| **E** | Original Filename | Exact initial filename from the AMC server | `Notice_15072026.pdf` |
 | **F** | File Size (KB) | Actual file size on disk | `245.8 KB` |
 | **G** | Downloaded At | Accurate audit timestamp (YYYY-MM-DD HH:MM:SS) | `2026-09-07 08:14:22` |
 
@@ -138,8 +142,13 @@ The auto-generated Excel report (`Addendum_Summary_<Date>.xlsx`) includes the fo
 ## 5. Compliance, Security & Data Integrity Controls
 
 1. **Tamper-Proof File Guarantee**:
-   The engine enforces magic-byte inspection (`%PDF-`). Any server error, login wall, or captive portal returning HTML is instantly rejected. Corrupted files can never enter the compliance folder.
-2. **Audit Trail & Immutability**:
-   Every downloaded document is timestamped and recorded in an immutable SQLite database (`data/addendum_tracker.db`) with its MD5 hash and origin URL.
-3. **Bandwidth & Rate Compliance**:
+   The engine enforces magic-byte inspection (`%PDF-`). Any server error, login wall, or captive portal returning HTML is instantly rejected. Corrupted files can never enter the compliance repository.
+2. **Statutory Audit Register (`data/addendum_master_tracker.xlsx`)**:
+   Every downloaded document is timestamped and recorded in the central Excel Master Tracker with its MD5 cryptographic hash, publication date, origin URL, and direct local file link. Zero database server credentials or IT permissions are needed.
+3. **Date-Range Compliance Filtering**:
+   Compliance officers can enforce statutory audit boundaries using `--from-date YYYY-MM-DD`, guaranteeing that historical filings outside the audit scope are not ingested.
+4. **Historical Archive Onboarding**:
+   Historical archives can be indexed into the Master Tracker via `python import_existing.py --folder "path/to/archive"`, preventing duplicate downloads and maintaining a single continuous register of all regulatory filings.
+5. **Bandwidth & Rate Compliance**:
    The engine uses gentle request pacing and connection keep-alive to ensure compliance with web security guidelines and prevent rate-limiting or server degradation on AMC portals.
+

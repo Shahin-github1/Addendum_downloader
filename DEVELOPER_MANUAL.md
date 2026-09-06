@@ -69,32 +69,35 @@ In `engine/extractor.py`, every document candidate passes through a two-stage fi
 
 ---
 
-### 1.4 Deduplication via SQLite (`data/addendum_tracker.db`)
+### 1.4 Deduplication via Excel Master Tracker (`data/addendum_master_tracker.xlsx`)
 
-To ensure idempotency (running the script 10 times in a day produces the exact same clean results without duplicate downloads), the system maintains a local SQLite database:
+To ensure complete transparency, accessibility, and zero-dependency operation (no database servers or IT permissions required), the system maintains a central Microsoft Excel master workbook:
 
-```sql
-CREATE TABLE IF NOT EXISTS addendum_records (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    amc_id TEXT NOT NULL,
-    amc_name TEXT NOT NULL,
-    doc_title TEXT NOT NULL,
-    doc_date TEXT,
-    pdf_url TEXT UNIQUE,
-    local_filename TEXT,
-    file_path TEXT,
-    file_size_kb REAL,
-    file_hash TEXT,
-    download_date TEXT,
-    download_timestamp TEXT
-);
-CREATE INDEX IF NOT EXISTS idx_pdf_url ON addendum_records (pdf_url);
-CREATE INDEX IF NOT EXISTS idx_amc_id ON addendum_records (amc_id);
-```
+* **Location**: `data/addendum_master_tracker.xlsx`
+* **Worksheets**:
+  1. `Downloaded Addendums`: Master ledger containing Sl No, AMC Name, Document Title, Publication Date, Original File Name, Source URL, Local File Path (clickable link), File Size (KB), Download Date, Timestamp, MD5 Hash, and Status.
+  2. `Execution History`: Tracks daily batch execution runs, total AMCs checked, new downloads, skipped counts, and error counts.
+* **In-Memory O(1) Deduplication**:
+  Upon initialization, `ExcelTracker` caches sets of existing `downloaded_urls`, `downloaded_files` `(amc_name, filename)`, and `downloaded_hashes`.
+  Before downloading, `tracker.is_downloaded(url, filename, amc)` checks these sets in **< 1 millisecond**, completely bypassing redundant network requests.
 
-* Deduplication key: `pdf_url` (Unique index).
-* Before downloading, `db.is_downloaded(url)` is queried in **< 1 millisecond**.
-* If a document already exists in the database and on disk, downloading is bypassed.
+---
+
+### 1.5 Configurable Date-Range Filtering (`--from-date`)
+
+To prevent downloading historical archives when only recent filings are desired:
+* Users specify a cutoff date via CLI (e.g. `--from-date 2026-07-01`) or configuration.
+* `engine/date_utils.parse_flexible_date` normalizes diverse Indian AMC date formats (`DD-MM-YYYY`, `DD-Mon-YYYY`, `YYYY-MM-DD`, `DD Month YYYY`) into `datetime.date` objects.
+* Any document published prior to the cutoff is filtered out immediately before downloading.
+* High-volume APIs (such as SBI MF's CMS service) receive the cutoff date directly in their server request payload (`FromDate: "01/07/2026"`), preventing transmission of unwanted records.
+
+---
+
+### 1.6 Historical File Ingestion Tool (`import_existing.py`)
+
+For teams with existing archives of previously downloaded addenda:
+* The CLI tool `python import_existing.py --folder "C:\path\to\archive"` recursively scans PDF files, computes MD5 hashes, and populates `data/addendum_master_tracker.xlsx`.
+* All archived files are marked with status `Historical Import`, ensuring the daily crawler never re-downloads them.
 
 ---
 
@@ -104,14 +107,17 @@ CREATE INDEX IF NOT EXISTS idx_amc_id ON addendum_records (amc_id);
 adendum_download/
 ├── config/
 │   └── amc_catalog.json          # Master catalog of all 50 AMCs with metadata and routing
+├── data/
+│   └── addendum_master_tracker.xlsx # Excel Master Tracker & Execution Ledger
 ├── engine/
 │   ├── __init__.py
 │   ├── batch_auditor.py          # Command-line tool to audit and verify AMC extraction
-│   ├── date_utils.py             # Financial year calculator & title/filename sanitizers
-│   ├── db.py                     # SQLite persistence layer and query methods
-│   ├── downloader.py             # Resilient chunked downloader with magic-byte verification
-│   ├── excel_reporter.py         # Formatted Excel report generator with clickable hyperlinks
+│   ├── date_utils.py             # Financial year calculator, flexible date parser & sanitizers
+│   ├── excel_tracker.py          # Excel Master State Tracker and deduplication engine
+│   ├── downloader.py             # Resilient chunked downloader preserving original filenames
+│   ├── excel_reporter.py         # Daily formatted Excel summary report generator
 │   └── extractor.py              # Core extraction engine (HTTP + Headless + Direct APIs)
+├── import_existing.py            # Standalone CLI tool to ingest existing PDF folders
 ├── main.py                       # CLI entry point, batch coordinator, and orchestrator
 ├── run_daily_downloader.bat      # Windows 1-click batch launcher
 ├── build_exe.bat                 # Automated PyInstaller compilation script
@@ -122,11 +128,11 @@ adendum_download/
 
 ### 2.1 `engine/extractor.py` (The Extraction Heart)
 Contains the `AMCExtractor` class. Key methods:
-* `extract_addendums(amc: dict) -> List[dict]`: High-level dispatcher.
-* `_extract_sbi(amc_id, amc_name)`: Sends direct POST request to SBI's internal CMS AJAX service:
+* `extract_addendums(amc: dict, from_date: Optional[datetime.date]) -> List[dict]`: High-level dispatcher.
+* `_extract_sbi(amc_id, amc_name, from_date)`: Direct POST to SBI's internal CMS AJAX service:
   * **Endpoint**: `https://www.sbimf.com/ajaxcall/CMS/GetNoticeandAddendumsData`
-  * **Payload**: `{"AddendumType": "Scheme Information", "FromDate": "01/01/2025", "ToDate": "09/07/2026"}`
-* `_extract_sundaram(amc_id, amc_name)`: Discovered and queries Sundaram's static JSON document feeds:
+  * **Payload**: `{"AddendumType": "Scheme Information", "FromDate": "01/07/2026", "ToDate": "09/07/2026"}`
+* `_extract_sundaram(amc_id, amc_name)`: Queries Sundaram's static JSON document feeds:
   * **Endpoints**: `https://www.sundarammutual.com/Upload/JSON/Addenda/{Year}_Addenda.json` and `{Year}_NoticeAd.json`
 * `_extract_trust(amc_id, amc_name)`: Queries Trust MF's internal XML-backed JSON API:
   * **Endpoint**: `https://www.trustmf.com/api/api/Trust/GetData`
@@ -139,18 +145,21 @@ Contains the `AMCExtractor` class. Key methods:
 
 ### 2.2 `engine/downloader.py` (File Retrieval & Validation)
 * Downloads files in 64 KB streaming chunks.
-* Verifies `b"%PDF-"` magic bytes.
+* Verifies `b"%PDF-"` magic bytes to eliminate corrupt HTML error pages.
+* Preserves 100% of the original server/URL filename via `extract_original_filename` (extracting from `Content-Disposition` or URL path), sanitizing only illegal Windows characters (`\ / : * ? " < > |`).
+* Organizes files into clean per-AMC subfolders: `downloads/{day_folder}/{clean_amc_name}/{original_filename}.pdf`.
 * Computes file size in KB and MD5 content checksum.
-* Cleans filenames using `date_utils.clean_filename` to prevent invalid Windows filename characters (`\ / : * ? " < > |`).
 
-### 2.3 `engine/excel_reporter.py` (Excel Summary Generator)
+### 2.3 `engine/excel_tracker.py` (Master Excel Tracker)
 * Built on `openpyxl`.
-* Styles header with dark navy fill (`#1F4E79`), bold white text, and centered alignment.
-* Generates native Excel hyperlinks: `=HYPERLINK("https://...", "Open Notice")`.
-* Sets column width auto-fit with safety margins.
-* Formats file sizes and timestamps cleanly.
+* Manages `data/addendum_master_tracker.xlsx`.
+* Automatically styles header cells with dark navy fill (`#1B365D`), bold white text, and borders.
+* Generates native Excel hyperlinks to locally saved PDF files.
+* Dynamically manages column width auto-fit.
 
 ### 2.4 `engine/date_utils.py` (Temporal & String Utilities)
+* `parse_flexible_date(date_str)`: Parses a wide array of date formats into standard `datetime.date`.
+* `is_date_on_or_after(date_val, cutoff)`: Determines whether an addendum meets the publication cutoff.
 * `get_indian_financial_year()`: Calculates Indian FY (April 1 to March 31).
   * Example: In September 2026, it returns `start_year: "2026"`, `end_year: "2027"`, `short: "2026-27"`, `long: "2026-2027"`.
   * Dynamically substitutes `{current_fy}` and `{current_year}` placeholders in `config/amc_catalog.json` so URLs never grow stale across fiscal years.

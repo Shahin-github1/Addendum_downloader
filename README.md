@@ -4,6 +4,14 @@ A dependable, production-grade automation system designed to download and track 
 
 ---
 
+## 📚 Complete System Documentation
+
+For detailed technical architectures and enterprise operational guides, please refer to:
+* 🛠️ **[Developer & Technical Manual](file:///c:/Users/Shahin%20Chakraborty/Desktop/adendum_download/DEVELOPER_MANUAL.md)**: Full codebase explanation, architectural rationale, code walkthrough, and new machine setup guide.
+* 🏢 **[Office & Enterprise System Documentation](file:///c:/Users/Shahin%20Chakraborty/Desktop/adendum_download/OFFICE_SYSTEM_DOCUMENTATION.md)**: Comprehensive business documentation, technology justifications, statutory disclosure catalogs across all 50 AMCs, and standard operating procedures (SOP).
+
+---
+
 ## 🌟 Key Features
 
 1. **Dependable & Incremental (Never Misses & No Duplicates)**:
